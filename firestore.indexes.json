@@ -1,0 +1,1 @@
+{"indexes":[{"collectionGroup":"records","queryScope":"COLLECTION","fields":[{"fieldPath":"category","order":"ASCENDING"},{"fieldPath":"score","order":"DESCENDING"},{"fieldPath":"elapsed","order":"ASCENDING"}]}],"fieldOverrides":[]}

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.firebase/
+.npm-cache/
+test-results/
+playwright-report/
+artifacts/
+art-source/contact.png
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db

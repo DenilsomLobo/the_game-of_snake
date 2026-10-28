@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#173523}canvas{display:block}</style></head><body><script type="module">
+import Phaser from 'phaser';
+import {ASSETS} from '/src/game/assets.js';
+import {SnakeRenderer} from '/src/game/snake-renderer.js';
+class Fixture extends Phaser.Scene{
+ preload(){this.load.image('floor',ASSETS.board);for(const [type,parts] of Object.entries(ASSETS.snakes))for(const [part,path] of Object.entries(parts))this.load.image(`${type}-${part}`,path);}
+ create(){this.add.image(320,320,'floor').setDisplaySize(640,640);const art=new SnakeRenderer(this);const vertices=[{x:3,y:16},{x:17,y:16},{x:17,y:9},{x:13,y:9},{x:13,y:6},{x:8,y:6},{x:8,y:3}];let points=[];for(let i=1;i<vertices.length;i++){const a=vertices[i-1],b=vertices[i],steps=Math.abs(b.x-a.x)+Math.abs(b.y-a.y);for(let j=0;j<steps;j++)points.push({x:31.2+(a.x+(b.x-a.x)*j/steps)*30.4,y:31.2+(a.y+(b.y-a.y)*j/steps)*30.4});}points.push({x:31.2+8*30.4,y:31.2+3*30.4});window.renderSnake=type=>art.draw(points,type,1,30.4,{x:-1,y:0});window.renderSnake('brown');window.artReady=true;}
+}
+new Phaser.Game({type:Phaser.CANVAS,width:640,height:640,scene:Fixture,banner:false});
+</script></body></html>

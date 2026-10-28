@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  match /records/{record} {
+   allow read: if true;
+   function valid() {
+    let d = request.resource.data;
+    return request.auth != null && d.keys().hasOnly(['uid','category','name','snake','score','elapsed','date','foods','powers','length'])
+      && d.uid == request.auth.uid && d.category in ['all','brown','black','yellow']
+      && record == request.auth.uid + '_' + d.category
+      && d.snake in ['brown','black','yellow'] && (d.category == 'all' || d.category == d.snake)
+      && d.name is string && d.name.size() >= 2 && d.name.size() <= 20
+      && d.score is int && d.score >= 0 && d.score <= 1000000 && d.score == d.foods * 10
+      && d.elapsed is int && d.elapsed >= 0 && d.elapsed <= 86400000
+      && d.date is int && d.date > 0 && d.date <= request.time.toMillis() + 60000
+      && d.foods is int && d.foods >= 0 && d.foods <= 100000
+      && d.powers is int && d.powers >= 0 && d.powers <= d.foods
+      && d.length is int && d.length >= 3 && d.length <= 400;
+   }
+   allow create: if valid();
+   allow update: if valid() && resource.data.uid == request.auth.uid
+      && (request.resource.data.score > resource.data.score ||
+      (request.resource.data.score == resource.data.score && request.resource.data.elapsed < resource.data.elapsed));
+   allow delete: if false;
+  }
+ }
+}

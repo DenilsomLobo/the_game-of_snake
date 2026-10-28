@@ -1,0 +1,30 @@
+import {test,expect} from '@playwright/test';
+import fs from 'node:fs';
+fs.mkdirSync('artifacts',{recursive:true});
+test('arte: curvas e cauda contínuas nas três cobras',async({page})=>{const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width:640,height:640});await page.goto('/e2e/snake-art.html');await page.waitForFunction(()=>window.artReady);for(const type of ['brown','black','yellow']){await page.evaluate(type=>window.renderSnake(type),type);await page.screenshot({path:`artifacts/curves-${type}.png`});}expect(errors).toEqual([]);});
+test('menu, sprites, tela cheia, partida, pausa, reinicio e ranking',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.setViewportSize({width:1440,height:900});await page.goto('/');
+ await expect(page.locator('#characters img')).toHaveCount(3);
+ await page.waitForFunction(()=>[...document.querySelectorAll('#characters img,.game-logo')].every(i=>i.complete&&i.naturalWidth>0));
+ await expect(page.locator('#play')).toBeVisible();
+ await page.screenshot({path:'artifacts/menu-desktop.png'});
+ await page.locator('#fullscreen').click();await expect(page.locator('#fullscreen')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#fullscreen').click();await expect(page.locator('#fullscreen')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#nickname').fill('Explorador QA');await page.locator('[data-snake="black"]').click();await page.locator('#play').click();
+ await expect(page.locator('#hud')).toBeVisible();await expect(page.locator('#menu')).toBeHidden();await page.waitForTimeout(350);await page.screenshot({path:'artifacts/game-desktop.png'});await page.locator('#pause').click();
+ await expect(page.locator('#resume')).toBeVisible();const clock=await page.locator('#time').textContent();await page.waitForTimeout(1100);expect(await page.locator('#time').textContent()).toBe(clock);
+ await page.screenshot({path:'artifacts/paused-desktop.png'});
+ await page.locator('#resume').click();await page.keyboard.press('ArrowUp');await page.waitForTimeout(450);await page.locator('#pause').click();
+ await page.locator('#restart').click();await expect(page.locator('#score')).toHaveText('0');await page.locator('#pause').click();await page.locator('#home').click();
+ await page.locator('#open-ranking').click();await expect(page.locator('.ranking-section')).toBeVisible();await page.locator('[data-filter="black"]').click();await page.locator('#close-ranking').click();
+ await page.locator('#settings').click();await expect(page.locator('#dialog')).toBeVisible();await page.locator('#close-dialog').click();
+ expect(errors).toEqual([]);
+});
+test('mobile: tabuleiro inteiro, joystick e game over sem rolagem',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width:390,height:844});await page.goto('/');await page.locator('#nickname').fill('Mobile QA');
+ await page.screenshot({path:'artifacts/menu-mobile.png'});await page.locator('#play').click();await page.locator('#pause').click();
+ const box=await page.locator('.board-wrap').boundingBox();expect(box.y).toBeGreaterThan(0);expect(box.y+box.height).toBeLessThan(844);expect(Math.abs(box.width-box.height)).toBeLessThan(1);
+ await expect(page.locator('#joystick')).toBeVisible();await page.locator('#resume').click();const joy=await page.locator('#joystick').boundingBox();await page.mouse.move(joy.x+55,joy.y+55);await page.mouse.down();await page.mouse.move(joy.x+55,joy.y+25);await page.mouse.up();await page.locator('#pause').click();
+ await page.screenshot({path:'artifacts/game-mobile.png'});await page.locator('#resume').click();await expect(page.locator('#again')).toBeVisible({timeout:8000});await page.locator('#again').click();await expect(page.locator('#score')).toHaveText('0');expect(errors).toEqual([]);
+});
