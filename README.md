@@ -232,3 +232,5 @@ A identidade visual foi desenvolvida com apoio de geração de imagens por IA, c
 ---
 
 Desenvolvido por [DenilsomLobo](https://github.com/DenilsomLobo).
+Para mais portifólios: [[Clique aqui !](https://portifolio-denilsom-lobo.web.app/).
+Para testar o jogo online: [[Clique aqui !](https://portifolio-denilsom-lobo.web.app/games/the_game_of_snake/play/).
